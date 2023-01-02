@@ -30,4 +30,4 @@ This app supports both Google Chrome and Microsoft Edge. The configuration behav
 
 ## Environment
 
-This is .NET7 application
+This is .NET7 application. Since this application interacts with the Windows registry, it does need elevated permissions to run.
