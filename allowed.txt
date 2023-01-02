@@ -9,3 +9,5 @@ https://server:8080/path
 google.com
 yahoo.com
 amazon.com
+bremmer.com
+youtube.com

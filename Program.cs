@@ -8,31 +8,6 @@ public class Program
 {
     public static int Main(string[] args)
     {
-        // Chrome allows the registry to be used to configure allow/block lists
-        // of websites. In this particular case, we only want a small subset of
-        // the web to be accessible, so the block list blocks everything and the
-        // all list allows the sites we want (NOTE: Chrome documentation indicates
-        // the allow list takes precedence over the block list, which allows this
-        // to work). Below is an example of a registry script that mimics what
-        // we're trying to do here:
-        /*
-            Windows Registry Editor Version 5.00
-            ; chrome version: 108.0.5359.125
-
-            [HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\URLAllowlist]
-            "1"="example.com"
-            "2"="https://ssl.server.com"
-            "3"="hosting.com/good_path"
-            "4"="https://server:8080/path"
-            "5"=".exact.hostname.com"
-
-            [HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\URLBlocklist]
-            "1"="*"
-        */
-
-        // NOTE: Edge works in a very similar fashion, just using a slightly different
-        // set of registry keys
-
         // ---- CLI Options ---- //
         var fileOption = new Option<FileInfo>(
             name: "--allowed",

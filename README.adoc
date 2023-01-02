@@ -1,0 +1,33 @@
+# little-lamb
+
+This is an app that allows for configuring a very limited browsing experience on a Chromium based web-browser running on Windows (such as Google Chrome or Microsoft Edge).
+
+Chromium supports this by defining an allow-list and block-list, where the allow-list takes precedence over the block-list. To meet our particular needs, the block-list is configured to block everything, and the allow-list is used to limit which websites may be browsed.
+
+NOTE: Regardless, `chrome://*` is always allowed so that settings and other configuration can still be accessed.
+
+.Example Registry Settings
+[source, registry]
+----
+Windows Registry Editor Version 5.00
+; chrome version: 108.0.5359.125
+
+[HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\URLAllowlist]
+"1"="example.com"
+"2"="https://ssl.server.com"
+"3"="hosting.com/good_path"
+"4"="https://server:8080/path"
+"5"=".exact.hostname.com"
+"6"="chrome://*"
+
+[HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\URLBlocklist]
+"1"="*"
+----
+
+## Products
+
+This app supports both Google Chrome and Microsoft Edge. The configuration behavior is the same, just a slight difference in the location of the registry keys.
+
+## Environment
+
+This is .NET7 application
