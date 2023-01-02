@@ -8,3 +8,4 @@ https://server:8080/path
 .exact.hostname.com
 google.com
 yahoo.com
+amazon.com

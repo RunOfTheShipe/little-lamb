@@ -39,19 +39,22 @@ var allowed = File.ReadAllLines("allowed.txt")
 const string BlockListKey = "Software\\Policies\\Google\\Chrome\\URLBlocklist";
 const string AllowListKey = "Software\\Policies\\Google\\Chrome\\URLAllowlist";
 
-// first, wipe everything from the block list to effectively start over
-Registry.LocalMachine.CreateSubKey(BlockListKey);
-Registry.LocalMachine.DeleteSubKeyTree(BlockListKey);
+// create/open the key, then clear anything that had been previously configured
 var regKey = Registry.LocalMachine.CreateSubKey(BlockListKey);
+foreach (var name in regKey.GetValueNames())
+{
+    regKey.DeleteValue(name);
+}
 regKey.SetValue("1", "*");
 
 // --- Allow List --- //
 
-// create, delete, then create the allow key, effectively clearing anything that
-// had been previously setup
-Registry.LocalMachine.CreateSubKey(AllowListKey);
-Registry.LocalMachine.DeleteSubKeyTree(AllowListKey);
+// create/open the key, then clear anything that had been previously configured
 regKey = Registry.LocalMachine.CreateSubKey(AllowListKey);
+foreach (var name in regKey.GetValueNames())
+{
+    regKey.DeleteValue(name);
+}
 
 // add each of the allowed websites
 for (int i = 0; i < allowed.Length; i++)
