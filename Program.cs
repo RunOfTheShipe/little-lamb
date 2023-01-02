@@ -3,8 +3,13 @@ using Microsoft.Win32;
 
 [assembly: SupportedOSPlatform("windows")]
 
-
+// TODO@BMS: Allow this to be configured from the command line
 // app to setup a block list
+var allowed = File.ReadAllLines("allowed.txt")
+    .Where(str => !String.IsNullOrWhiteSpace(str))
+    .Where(str => !str.StartsWith("#"))
+    .Select(str => str.Trim())
+    .ToArray();
 
 // Software\Policies\Google\Chrome\URLBlocklist
 
@@ -18,15 +23,6 @@ Registry.LocalMachine.DeleteSubKeyTree("Software\\Policies\\Google\\Chrome\\UrlB
 
 // Software\Policies\Google\Chrome\URLAllowlist
 // allow chrome:// (access to settings)
-
-string[] allowed = new string[]
-{
-    "example.com",
-    "https://ssl.server.com",
-    "hosting.com/good_path",
-    "https://server:8080/path",
-    ".exact.hostname.com"
-};
 
 // create, then delete the subkey so it effectively erases everything that may already be present
 Registry.LocalMachine.CreateSubKey("Software\\Policies\\Google\\Chrome\\UrlAllowlist");

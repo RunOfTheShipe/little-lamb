@@ -1,0 +1,8 @@
+# Each line is a different website to allow; any line beginning with a #
+# sign or is only whitespace will be ignored
+
+example.com
+https://ssl.server.com
+hosting.com/good_path
+https://server:8080/path
+.exact.hostname.com
