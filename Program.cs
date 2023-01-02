@@ -11,6 +11,9 @@ var allowed = File.ReadAllLines("allowed.txt")
     .Where(str => !str.StartsWith("#"))
     .ToArray();
 
+// support chrome or edge
+bool chrome = true;
+
 // Chrome allows the registry to be used to configure allow/block lists
 // of websites. In this particular case, we only want a small subset of
 // the web to be accessible, so the block list blocks everything and the
@@ -34,13 +37,14 @@ var allowed = File.ReadAllLines("allowed.txt")
 */
 
 // --- Block List --- //
+string company = chrome ? "Google" : "Microsoft";
+string product = chrome ? "Chrome" : "Edge";
 
-// Software\Policies\Google\Chrome\URLBlocklist
-const string BlockListKey = "Software\\Policies\\Google\\Chrome\\URLBlocklist";
-const string AllowListKey = "Software\\Policies\\Google\\Chrome\\URLAllowlist";
+string blockListKey = $"Software\\Policies\\{company}\\{product}\\URLBlocklist";
+string allowListKey = $"Software\\Policies\\{company}\\{product}\\URLAllowlist";
 
 // create/open the key, then clear anything that had been previously configured
-var regKey = Registry.LocalMachine.CreateSubKey(BlockListKey);
+var regKey = Registry.LocalMachine.CreateSubKey(blockListKey);
 foreach (var name in regKey.GetValueNames())
 {
     regKey.DeleteValue(name);
@@ -50,7 +54,7 @@ regKey.SetValue("1", "*");
 // --- Allow List --- //
 
 // create/open the key, then clear anything that had been previously configured
-regKey = Registry.LocalMachine.CreateSubKey(AllowListKey);
+regKey = Registry.LocalMachine.CreateSubKey(allowListKey);
 foreach (var name in regKey.GetValueNames())
 {
     regKey.DeleteValue(name);
