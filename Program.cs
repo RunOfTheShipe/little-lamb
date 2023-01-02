@@ -4,39 +4,60 @@ using Microsoft.Win32;
 [assembly: SupportedOSPlatform("windows")]
 
 // TODO@BMS: Allow this to be configured from the command line
-// app to setup a block list
+// Read the file, ignoring any empty lines or lines starting with #
 var allowed = File.ReadAllLines("allowed.txt")
-    .Where(str => !String.IsNullOrWhiteSpace(str))
-    .Where(str => !str.StartsWith("#"))
     .Select(str => str.Trim())
+    .Where(str => !String.IsNullOrEmpty(str))
+    .Where(str => !str.StartsWith("#"))
     .ToArray();
 
+// Chrome allows the registry to be used to configure allow/block lists
+// of websites. In this particular case, we only want a small subset of
+// the web to be accessible, so the block list blocks everything and the
+// all list allows the sites we want (NOTE: Chrome documentation indicates
+// the allow list takes precedence over the block list, which allows this
+// to work). Below is an example of a registry script that mimics what
+// we're trying to do here:
+/*
+    Windows Registry Editor Version 5.00
+    ; chrome version: 108.0.5359.125
+
+    [HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\URLAllowlist]
+    "1"="example.com"
+    "2"="https://ssl.server.com"
+    "3"="hosting.com/good_path"
+    "4"="https://server:8080/path"
+    "5"=".exact.hostname.com"
+
+    [HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\URLBlocklist]
+    "1"="*"
+*/
+
+// --- Block List --- //
+
 // Software\Policies\Google\Chrome\URLBlocklist
+const string BlockListKey = "Software\\Policies\\Google\\Chrome\\URLBlocklist";
+const string AllowListKey = "Software\\Policies\\Google\\Chrome\\URLAllowlist";
 
 // first, wipe everything from the block list to effectively start over
-var regKey = Registry.LocalMachine.CreateSubKey("Software\\Policies\\Google\\Chrome\\UrlBlocklist");
-Registry.LocalMachine.DeleteSubKeyTree("Software\\Policies\\Google\\Chrome\\UrlBlocklist");
+Registry.LocalMachine.CreateSubKey(BlockListKey);
+Registry.LocalMachine.DeleteSubKeyTree(BlockListKey);
+var regKey = Registry.LocalMachine.CreateSubKey(BlockListKey);
+regKey.SetValue("1", "*");
 
-// recreate the key (will be empty) and block everything
-// regKey = Registry.LocalMachine.CreateSubKey("Software\\Policies\\Google\\Chrome\\UrlBlocklist");
-// regKey.SetValue("1", "*");
+// --- Allow List --- //
 
-// Software\Policies\Google\Chrome\URLAllowlist
-// allow chrome:// (access to settings)
-
-// create, then delete the subkey so it effectively erases everything that may already be present
-Registry.LocalMachine.CreateSubKey("Software\\Policies\\Google\\Chrome\\UrlAllowlist");
-Registry.LocalMachine.DeleteSubKeyTree("Software\\Policies\\Google\\Chrome\\UrlAllowlist");
+// create, delete, then create the allow key, effectively clearing anything that
+// had been previously setup
+Registry.LocalMachine.CreateSubKey(AllowListKey);
+Registry.LocalMachine.DeleteSubKeyTree(AllowListKey);
+regKey = Registry.LocalMachine.CreateSubKey(AllowListKey);
 
 // add each of the allowed websites
 for (int i = 0; i < allowed.Length; i++)
 {
-    regKey = Registry.LocalMachine.CreateSubKey($"Software\\Policies\\Google\\Chrome\\UrlAllowlist\\{i+1}");
-    regKey.SetValue(allowed[i], "");
+    regKey.SetValue($"{i+1}", allowed[i]);
 }
 
-// last, always allow "chrome//*" so settings can be viewed and updated
-regKey = Registry.LocalMachine.CreateSubKey($"Software\\Policies\\Google\\Chrome\\UrlAllowlist\\{allowed.Length+1}");
-regKey.SetValue("chrome//*", "");
-// regKey = Registry.LocalMachine.CreateSubKey("Software\\Policies\\Google\\Chrome\\UrlAllowlist");
-// regKey.SetValue("1", "chrome//*");
+// last, always allow "chrome://*" so settings can be viewed and updated
+regKey.SetValue($"{allowed.Length+1}", "chrome://*");
